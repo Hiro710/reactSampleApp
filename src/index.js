@@ -3,10 +3,25 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 class Square extends React.Component {
+  // コンストラクタを追加してstateを初期化
+  constructor(props) {
+    super(props);
+    // React コンポーネントはコンストラクタで this.state を設定することで、状態を持つことができる
+    // this.stateは定義されているコンポーネント内でプライベートである
+    this.state = {
+      value: null,
+    };
+  }
+
   render() {
     return(
-      <button className="square">
-        {/* TODO */}
+      // アロー関数を使ってタイプ量を減らす
+      // onClick={function(){alert('click');}}ではなく以下の様に記述する () =>を書くのを忘れない
+      // onClickプロパティに渡しているのは関数である
+      <button
+        className="square"
+        onClick={() => this.setState({value: '❌'})}>
+        { this.state.value }
       </button>
     );
   }
@@ -14,7 +29,7 @@ class Square extends React.Component {
 
 class Board extends React.Component {
   renderSquare(i) {
-    return <Square />;
+    return <Square value={i} />;
   }
 
   render() {
