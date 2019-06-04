@@ -2,38 +2,49 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-class Square extends React.Component {
-  // コンストラクタを追加してstateを初期化
-  constructor(props) {
-    super(props);
-    // React コンポーネントはコンストラクタで this.state を設定することで、状態を持つことができる
-    // this.stateは定義されているコンポーネント内でプライベートである
-    this.state = {
-      value: null,
-    };
-  }
-
-  render() {
-    return(
-      // アロー関数を使ってタイプ量を減らす
-      // onClick={function(){alert('click');}}ではなく以下の様に記述する () =>を書くのを忘れない
-      // onClickプロパティに渡しているのは関数である
-      <button
-        className="square"
-        onClick={() => this.setState({value: '❌'})}>
-        { this.state.value }
+// Squareを関数コンポーネントに書き換え
+function Square(props) {
+  return(
+      <button className="square" onClick={props.onClick}>
+        { props.value }
       </button>
-    );
-  }
+  );
 }
 
 class Board extends React.Component {
+  // Board にコンストラクタを追加し、初期 state に 9 個の null が 9 個のマス目に対応する 9 個の null 値をセット
+  constructor(props) {
+    super(props);
+    this.state = {
+      squares: Array(9).fill(null),
+      // デフォルトで先手をバツに設定する
+      xIsNext: true,
+    };
+  }
+
+  // handleClickを定義する
+  handleClick(i) {
+    const squares = this.state.squares.slice();
+    squares[i] = this.state.xIsNext ? '❌' : '⭕️';
+    this.setState({
+      squares: squares,
+      xIsNext: !this.state.xIsNext,
+    });
+  }
+
+  // Square に現在の値（'X'、'O' または null）を伝えるようにする
+  // Board から Square に関数を渡すことにして、マス目がクリックされた時に Square にその関数を呼んでもらうようにする
   renderSquare(i) {
-    return <Square value={i} />;
+    return (
+      <Square
+        value={this.state.squares[i]}
+        onClick={() => this.handleClick(i)}
+      />
+    );
   }
 
   render() {
-    const status = "Next player: X";
+    const status = "Next player: " + (this.state.xIsNext ? '❌' : '⭕️');
 
     return(
       <div>
