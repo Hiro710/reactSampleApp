@@ -56,6 +56,8 @@ class Game extends React.Component {
       history: [{
         squares: Array(9).fill(null),
       }],
+      // いま何手目の状態を見ているのかを表す
+      stepNumber: 0,
       // デフォルトで先手をバツに設定する
       xIsNext: true,
     };
@@ -64,7 +66,10 @@ class Game extends React.Component {
   // handleClickを定義する
   handleClick(i) {
     // Game 内の handleClick メソッドで、新しい履歴エントリを history に追加
-    const history = this.state.history;
+    // 「時間の巻き戻し」をしてからその時点で新しい着手を起こした場合に、
+    // そこから見て「未来」にある履歴を確実に捨て去ることができる
+    const history = this.state.history.slice(0, this.state.stepNumber + 1);
+
     const current = history[history.length - 1];
     const squares = current.squares.slice();
     // ゲームの決着が既についている場合やクリックされたマス目が既に埋まっている場合に早期に return するようにする
@@ -78,16 +83,43 @@ class Game extends React.Component {
       history: history.concat([{
         squares: squares,
       }]),
+      // stepNumber を更新する
+      stepNumber: history.length,
+
       xIsNext: !this.state.xIsNext,
     });
+  }
+
+  // jumpTo メソッドを定義してその stepNumber が更新されるようにする
+  // 更新しようとしている stepNumber の値が偶数だった場合は xIsNext を true に設定
+  jumpTo(step) {
+    this.setState({
+      stepNumber: step,
+      xIsNext: (step % 2) === 0,
+    })
   }
 
   render() {
     // render 関数を更新して、ゲームのステータステキストの決定や表示の際に最新の履歴が使われるようにする
     const history = this.state.history;
-    const current = history[history.length - 1];
+    // 常に最後の着手後の状態をレンダーするのではなく stepNumber によって現在選択されている着手をレンダーするようにするｙ
+    const current = history[this.state.stepNumber];
     // いずれかのプレーヤが勝利したかどうか判定。決着がついた場合は “Winner: X” あるいは “Winner: O”
     const winner = calculateWiunner(current.squares);
+
+    // map()メソッドを使って着手履歴の配列をマップして画面上のボタンを表現する React 要素を作りだし、
+    // 過去の手番に「ジャンプ」するためのボタンの一覧を表示
+    const moves = history.map((step, move) => {
+      const desc = move ?
+        'Go to move #' + move;
+        'Go to game start';
+      return (
+        // keyは追加一意なIDをキーとしている
+        <li key={move}>
+          <button onClick={() => this.jumpTo(move)}>{ desc }</button>
+        </li>
+      );
+    });
 
     let status;
     if (winner) {
@@ -106,7 +138,7 @@ class Game extends React.Component {
         </div>
         <div className="game-info">
           <div>{ status }</div>
-          <ol>{/* TODO */}</ol>
+        <ol>{ moves }</ol>
         </div>
       </div>
     );
