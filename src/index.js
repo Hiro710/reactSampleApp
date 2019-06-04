@@ -111,7 +111,7 @@ class Game extends React.Component {
     // 過去の手番に「ジャンプ」するためのボタンの一覧を表示
     const moves = history.map((step, move) => {
       const desc = move ?
-        'Go to move #' + move;
+        'Go to move #' + move :
         'Go to game start';
       return (
         // keyは追加一意なIDをキーとしている
